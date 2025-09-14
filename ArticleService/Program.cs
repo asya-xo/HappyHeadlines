@@ -1,32 +1,39 @@
-using ArticleService.Data;
+using CommentService.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// DI singletons
-builder.Services.AddSingleton<RegionConnectionResolver>();
-builder.Services.AddSingleton<ArticleRepository>();
+// Database connection
+var connString = builder.Configuration["DB_CONN"];
+builder.Services.AddDbContext<CommentDbContext>(options =>
+    options.UseNpgsql(connString));
 
+// DI for repository
+builder.Services.AddScoped<CommentRepository>();
+
+// Controllers
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
+// Swagger UI
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapControllers();
 
-// simple endpoint to see which instance served the request
+// health check endpoint
 app.MapGet("/whoami", () =>
 {
     var instance = Environment.GetEnvironmentVariable("INSTANCE_NAME")
                    ?? Environment.GetEnvironmentVariable("HOSTNAME")
                    ?? Environment.MachineName;
 
-    return Results.Ok(new { instance });
+    return Results.Ok(new { service = "CommentService", instance });
 });
-
 
 app.Run();

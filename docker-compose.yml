@@ -28,6 +28,45 @@ services:
       - article-service-3
     networks: [hhnet]
 
+  # Comment service + DB (UGE 37)
+  comment-service:
+    build:
+      context: ./CommentService
+    environment:
+      DB_CONN: Host=comment-db;Username=hh;Password=hh;Database=comments
+      PROFANITY_URL: http://profanity-service:80
+    depends_on:
+      - comment-db
+      - profanity-service
+    networks: [hhnet]
+
+  comment-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: "hh"
+      POSTGRES_PASSWORD: "hh"
+      POSTGRES_DB: "comments"
+    networks: [hhnet]
+
+  # Profanity service + DB
+  profanity-service:
+    build:
+      context: ./ProfanityService
+    environment:
+      DB_CONN: Host=profanity-db;Username=hh;Password=hh;Database=profanity
+    depends_on:
+      - profanity-db
+    networks: [hhnet]
+
+  profanity-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: "hh"
+      POSTGRES_PASSWORD: "hh"
+      POSTGRES_DB: "profanity"
+    networks: [hhnet]
+
+
   # 3 ArticleService instances
   article-service-1:
     build:
