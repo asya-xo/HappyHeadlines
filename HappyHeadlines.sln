@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36414.22 d17.14
+VisualStudioVersion = 17.14.36414.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HappyHeadlines", "HappyHeadlines\HappyHeadlines.csproj", "{E08FE4E7-6DE4-49A9-B68F-D4C64CBB0777}"
 EndProject
@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{02EA68
 	ProjectSection(SolutionItems) = preProject
 		nginx.conf = nginx.conf
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProfanityService", "..\ProfanityService\ProfanityService.csproj", "{44DE32BD-3119-4ABA-AF56-BF94813BAA0B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +34,10 @@ Global
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44DE32BD-3119-4ABA-AF56-BF94813BAA0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44DE32BD-3119-4ABA-AF56-BF94813BAA0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44DE32BD-3119-4ABA-AF56-BF94813BAA0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44DE32BD-3119-4ABA-AF56-BF94813BAA0B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
