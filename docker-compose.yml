@@ -1,5 +1,3 @@
-version: "3.9"
-
 networks:
   hhnet:
 
@@ -14,32 +12,8 @@ x-article-env: &article_env
   DB_CONN_AN:     Host=an-db;Username=hh;Password=hh;Database=articles
 
 services:
-  # Load balancer (X-axis split entrypoint)
-  lb:
-    image: nginx:alpine
-    container_name: article-lb
-    volumes:
-      - C:/Users/G-UNIT/source/repos/HappyHeadlines/deploy/nginx.conf:/etc/nginx/nginx.conf:ro
-    ports:
-      - "8080:80"
-    depends_on:
-      - article-service-1
-      - article-service-2
-      - article-service-3
-    networks: [hhnet]
 
-  # Comment service + DB (UGE 37)
-  comment-service:
-    build:
-      context: ./CommentService
-    environment:
-      DB_CONN: Host=comment-db;Username=hh;Password=hh;Database=comments
-      PROFANITY_URL: http://profanity-service:80
-    depends_on:
-      - comment-db
-      - profanity-service
-    networks: [hhnet]
-
+  # Comment service + DB
   comment-db:
     image: postgres:16-alpine
     environment:
@@ -48,16 +22,20 @@ services:
       POSTGRES_DB: "comments"
     networks: [hhnet]
 
-  # Profanity service + DB
-  profanity-service:
+  comment-service:
     build:
-      context: ./ProfanityService
+      context: ./CommentService
     environment:
-      DB_CONN: Host=profanity-db;Username=hh;Password=hh;Database=profanity
+      DB_CONN: Host=comment-db;Username=hh;Password=hh;Database=comments
+      PROFANITY_URL: http://profanity-service:80
+    ports:
+      - "5001:80"
     depends_on:
-      - profanity-db
+      - comment-db
+      - profanity-service
     networks: [hhnet]
 
+  # Profanity service + DB
   profanity-db:
     image: postgres:16-alpine
     environment:
@@ -66,6 +44,16 @@ services:
       POSTGRES_DB: "profanity"
     networks: [hhnet]
 
+  profanity-service:
+    build:
+      context: ./ProfanityService
+    environment:
+      DB_CONN: Host=profanity-db;Username=hh;Password=hh;Database=profanity
+    ports:
+      - "5002:80"
+    depends_on:
+      - profanity-db
+    networks: [hhnet]
 
   # 3 ArticleService instances
   article-service-1:
@@ -93,6 +81,20 @@ services:
       <<: *article_env
       INSTANCE_NAME: "article-service-3"
     depends_on: [global-db, eu-db, na-db, sa-db, af-db, as-db, oc-db, an-db]
+    networks: [hhnet]
+
+  # Load balancer
+  lb:
+    image: nginx:alpine
+    container_name: article-lb
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - article-service-1
+      - article-service-2
+      - article-service-3
     networks: [hhnet]
 
   # 8 Postgres databases (Y-axis split)
