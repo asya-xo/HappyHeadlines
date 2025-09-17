@@ -1,16 +1,16 @@
-﻿# Use the official .NET SDK image to build the app
+﻿# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy csproj and restore as distinct layers
-COPY *.csproj ./
+# Copy csproj and restore
+COPY CommentService.csproj ./
 RUN dotnet restore
 
-# Copy everything else and build
+# Copy everything and build
 COPY . ./
 RUN dotnet publish -c Release -o /app
 
-# Final runtime image
+# Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY --from=build /app ./

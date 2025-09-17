@@ -1,3 +1,5 @@
+version: "3.9"
+
 networks:
   hhnet:
 
@@ -13,7 +15,9 @@ x-article-env: &article_env
 
 services:
 
-  # Comment service + DB
+  # ---------------------------
+  # Comment service + database
+  # ---------------------------
   comment-db:
     image: postgres:16-alpine
     environment:
@@ -27,15 +31,17 @@ services:
       context: ./CommentService
     environment:
       DB_CONN: Host=comment-db;Username=hh;Password=hh;Database=comments
-      PROFANITY_URL: http://profanity-service:80
+      PROFANITY_URL: http://profanity-service:8080/api/profanity/
     ports:
-      - "5001:80"
+      - "5001:8080"
     depends_on:
       - comment-db
       - profanity-service
     networks: [hhnet]
 
-  # Profanity service + DB
+  # ---------------------------
+  # Profanity service + database
+  # ---------------------------
   profanity-db:
     image: postgres:16-alpine
     environment:
@@ -50,19 +56,29 @@ services:
     environment:
       DB_CONN: Host=profanity-db;Username=hh;Password=hh;Database=profanity
     ports:
-      - "5002:80"
+      - "5002:8080"
     depends_on:
       - profanity-db
     networks: [hhnet]
 
-  # 3 ArticleService instances
+  # ---------------------------
+  # Article services (x3)
+  # ---------------------------
   article-service-1:
     build:
       context: ./ArticleService
     environment:
       <<: *article_env
       INSTANCE_NAME: "article-service-1"
-    depends_on: [global-db, eu-db, na-db, sa-db, af-db, as-db, oc-db, an-db]
+    depends_on:
+      - global-db
+      - eu-db
+      - na-db
+      - sa-db
+      - af-db
+      - as-db
+      - oc-db
+      - an-db
     networks: [hhnet]
 
   article-service-2:
@@ -71,7 +87,15 @@ services:
     environment:
       <<: *article_env
       INSTANCE_NAME: "article-service-2"
-    depends_on: [global-db, eu-db, na-db, sa-db, af-db, as-db, oc-db, an-db]
+    depends_on:
+      - global-db
+      - eu-db
+      - na-db
+      - sa-db
+      - af-db
+      - as-db
+      - oc-db
+      - an-db
     networks: [hhnet]
 
   article-service-3:
@@ -80,15 +104,25 @@ services:
     environment:
       <<: *article_env
       INSTANCE_NAME: "article-service-3"
-    depends_on: [global-db, eu-db, na-db, sa-db, af-db, as-db, oc-db, an-db]
+    depends_on:
+      - global-db
+      - eu-db
+      - na-db
+      - sa-db
+      - af-db
+      - as-db
+      - oc-db
+      - an-db
     networks: [hhnet]
 
-  # Load balancer
+  # ---------------------------
+  # Load balancer (nginx)
+  # ---------------------------
   lb:
     image: nginx:alpine
     container_name: article-lb
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deploy/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - "8080:80"
     depends_on:
@@ -97,7 +131,9 @@ services:
       - article-service-3
     networks: [hhnet]
 
-  # 8 Postgres databases (Y-axis split)
+  # ---------------------------
+  # Postgres databases for articles
+  # ---------------------------
   global-db:
     image: postgres:16-alpine
     environment:
