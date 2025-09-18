@@ -31,7 +31,7 @@ services:
       context: ./CommentService
     environment:
       DB_CONN: Host=comment-db;Username=hh;Password=hh;Database=comments
-      PROFANITY_URL: http://profanity-service:8080/api/profanity/
+      PROFANITY_URL: http://profanity-service/api/profanity/
     ports:
       - "5001:8080"
     depends_on:

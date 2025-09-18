@@ -34,6 +34,14 @@ namespace ProfanityService
             app.UseAuthorization();
             app.MapControllers();
 
+            // MAking sure database is created / migrated
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ProfanityDbContext>();
+                db.Database.EnsureCreated(); 
+            }
+
+
             app.Run();
         }
     }

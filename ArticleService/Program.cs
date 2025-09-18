@@ -1,4 +1,4 @@
-using CommentService.Data;
+using ArticleService.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,13 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Database connection
-var connString = builder.Configuration["DB_CONN"];
-builder.Services.AddDbContext<CommentDbContext>(options =>
-    options.UseNpgsql(connString));
+// Region resolver for multiple DBs
+builder.Services.AddSingleton<RegionConnectionResolver>();
 
 // DI for repository
-builder.Services.AddScoped<CommentRepository>();
+builder.Services.AddScoped<ArticleRepository>();
 
 // Controllers
 builder.Services.AddControllers();
@@ -33,7 +31,7 @@ app.MapGet("/whoami", () =>
                    ?? Environment.GetEnvironmentVariable("HOSTNAME")
                    ?? Environment.MachineName;
 
-    return Results.Ok(new { service = "CommentService", instance });
+    return Results.Ok(new { service = "ArticleService", instance });
 });
 
 app.Run();
