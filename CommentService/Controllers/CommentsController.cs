@@ -2,7 +2,6 @@
 using CommentService.Data;
 using CommentService.Models;
 using System.Net.Http;
-using System.Text.Json;
 
 namespace CommentService.Controllers
 {
@@ -31,8 +30,12 @@ namespace CommentService.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] Comment comment)
         {
-            // Ask ProfanityService if this comment contains bad words
-            var response = await _profanityClient.PostAsJsonAsync("check", comment.Text);
+            // Build request body for ProfanityService
+            var requestBody = new { Text = comment.Text };
+
+            // Call ProfanityService
+            var response = await _profanityClient.PostAsJsonAsync("check", requestBody);
+
             if (!response.IsSuccessStatusCode)
             {
                 return StatusCode(503, "ProfanityService unavailable");

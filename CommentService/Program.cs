@@ -14,9 +14,10 @@ builder.Services.AddDbContext<CommentDbContext>(options =>
 builder.Services.AddScoped<CommentRepository>();
 
 // ProfanityService URL (env > appsettings > fallback localhost)
+// Important: don't end with /check, just the base path
 var profanityUrl = builder.Configuration["PROFANITY_URL"]
                    ?? builder.Configuration["ProfanityService:BaseUrl"]
-                   ?? "http://localhost:5001/api/profanity/";
+                   ?? "http://localhost:5002/api/profanity/";
 
 builder.Services.AddHttpClient("ProfanityService", client =>
 {
