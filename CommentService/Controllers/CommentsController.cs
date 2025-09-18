@@ -30,29 +30,42 @@ namespace CommentService.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] Comment comment)
         {
-            // Build request body for ProfanityService
-            var requestBody = new { Text = comment.Text };
-
-            // Call ProfanityService
-            var response = await _profanityClient.PostAsJsonAsync("check", requestBody);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                return StatusCode(503, "ProfanityService unavailable");
-            }
+                var requestBody = new { Text = comment.Text };
 
-            var result = await response.Content.ReadFromJsonAsync<ProfanityCheckResponse>();
-            if (result?.ContainsProfanity == true)
+                var response = await _profanityClient.PostAsJsonAsync("check", requestBody);
+
+                Console.WriteLine($"[CommentService] ProfanityService responded: {response.StatusCode}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return StatusCode(503, "ProfanityService unavailable");
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"[CommentService] Raw response from ProfanityService: {json}");
+
+                var result = await response.Content.ReadFromJsonAsync<ProfanityCheckResponse>(
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
+
+                if (result?.ContainsProfanity == true)
+                {
+                    return BadRequest("Your comment contains profanity!!");
+                }
+
+                _repo.Add(comment);
+                return Ok(comment);
+            }
+            catch (Exception ex)
             {
-                return BadRequest("Your comment contains profanity 🚫");
+                Console.WriteLine($"[CommentService] ERROR in Add(): {ex}");
+                return StatusCode(500, $"Internal error: {ex.Message}");
             }
-
-            _repo.Add(comment);
-            return Ok(comment);
         }
     }
 
-    // Match ProfanityService JSON { "containsProfanity": true/false }
     public class ProfanityCheckResponse
     {
         public bool ContainsProfanity { get; set; }

@@ -34,11 +34,28 @@ namespace ProfanityService
             app.UseAuthorization();
             app.MapControllers();
 
-            // ✅ Apply migrations on startup
+            // Apply migrations with retry logic
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<ProfanityDbContext>();
-                db.Database.Migrate();  
+
+                var retries = 5;
+                while (retries > 0)
+                {
+                    try
+                    {
+                        db.Database.Migrate();
+                        Console.WriteLine("Profanity DB migration applied.");
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        retries--;
+                        Console.WriteLine($"Could not connect to DB ({ex.Message}). Retries left: {retries}");
+                        Thread.Sleep(2000); 
+                        if (retries == 0) throw; 
+                    }
+                }
             }
 
             app.Run();
