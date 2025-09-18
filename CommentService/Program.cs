@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using CommentService.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,7 +14,6 @@ builder.Services.AddDbContext<CommentDbContext>(options =>
 builder.Services.AddScoped<CommentRepository>();
 
 // ProfanityService URL (env > appsettings > fallback localhost)
-// Important: don't end with /check, just the base path
 var profanityUrl = builder.Configuration["PROFANITY_URL"]
                    ?? builder.Configuration["ProfanityService:BaseUrl"]
                    ?? "http://localhost:5002/api/profanity/";
@@ -35,5 +34,12 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapControllers();
+
+// Apply migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<CommentDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();

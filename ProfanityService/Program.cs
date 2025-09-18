@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using ProfanityService.Data;
 
 namespace ProfanityService
@@ -34,13 +34,12 @@ namespace ProfanityService
             app.UseAuthorization();
             app.MapControllers();
 
-            // MAking sure database is created / migrated
+            // ✅ Apply migrations on startup
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<ProfanityDbContext>();
-                db.Database.EnsureCreated(); 
+                db.Database.Migrate();  
             }
-
 
             app.Run();
         }
