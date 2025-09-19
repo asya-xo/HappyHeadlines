@@ -26,7 +26,7 @@ builder.Services.AddHttpClient("ProfanityService", client =>
 .AddPolicyHandler(HttpPolicyExtensions
     .HandleTransientHttpError()
     .CircuitBreakerAsync(
-        handledEventsAllowedBeforeBreaking: 3,
+        handledEventsAllowedBeforeBreaking: 1,
         durationOfBreak: TimeSpan.FromSeconds(30),
         onBreak: (outcome, breakDelay) =>
         {
