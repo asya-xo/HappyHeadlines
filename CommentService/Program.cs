@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using CommentService.Data;
+﻿using CommentService.Data;
+using Microsoft.EntityFrameworkCore;
+using Polly;
+using Polly.Extensions.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Connection stringg
+// Connection string
 var connString = builder.Configuration["DB_CONN"]
                  ?? builder.Configuration.GetConnectionString("DB_CONN")
                  ?? "Host=localhost;Username=hh;Password=hh;Database=comments";
@@ -16,11 +18,29 @@ builder.Services.AddScoped<CommentRepository>();
 // ProfanityService URL 
 var profanityUrl = builder.Configuration["PROFANITY_URL"];
 
-
+// Add HttpClient with Circuit Breaker
 builder.Services.AddHttpClient("ProfanityService", client =>
 {
     client.BaseAddress = new Uri(profanityUrl);
-});
+})
+.AddPolicyHandler(HttpPolicyExtensions
+    .HandleTransientHttpError()
+    .CircuitBreakerAsync(
+        handledEventsAllowedBeforeBreaking: 3,
+        durationOfBreak: TimeSpan.FromSeconds(30),
+        onBreak: (outcome, breakDelay) =>
+        {
+            Console.WriteLine($"[CircuitBreaker] OPEN - ProfanityService down, retry after {breakDelay.TotalSeconds}s");
+        },
+        onReset: () =>
+        {
+            Console.WriteLine("[CircuitBreaker] CLOSED - ProfanityService healthy again");
+        },
+        onHalfOpen: () =>
+        {
+            Console.WriteLine("[CircuitBreaker] HALF-OPEN - Testing ProfanityService");
+        }
+    ));
 
 // Controllers + Swagger
 builder.Services.AddControllers();

@@ -2,6 +2,7 @@
 using CommentService.Data;
 using CommentService.Models;
 using System.Net.Http;
+using Polly.CircuitBreaker; // 👈 add this
 
 namespace CommentService.Controllers
 {
@@ -57,6 +58,11 @@ namespace CommentService.Controllers
 
                 _repo.Add(comment);
                 return Ok(comment);
+            }
+            catch (BrokenCircuitException)
+            {
+                Console.WriteLine("[CommentService] Circuit breaker is OPEN – ProfanityService unavailable.");
+                return StatusCode(503, new { error = "ProfanityService unavailable (circuit breaker open)" });
             }
             catch (Exception ex)
             {
