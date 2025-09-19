@@ -12,9 +12,9 @@ x-article-env: &article_env
   DB_CONN_AN:     Host=an-db;Username=hh;Password=hh;Database=articles
 
 services:
-  # ---------------------------
+  
   # Comment service + database
-  # ---------------------------
+  
   comment-db:
     image: postgres:16-alpine
     environment:
@@ -42,9 +42,9 @@ services:
         condition: service_started
     networks: [hhnet]
 
-  # ---------------------------
+  
   # Profanity service + database
-  # ---------------------------
+  
   profanity-db:
     image: postgres:16-alpine
     environment:
@@ -69,9 +69,36 @@ services:
         condition: service_healthy
     networks: [hhnet]
 
-  # ---------------------------
+  
+  # Draft service + database
+  
+  draft-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: "hh"
+      POSTGRES_PASSWORD: "hh"
+      POSTGRES_DB: "drafts"
+    networks: [hhnet]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hh -d drafts"]
+      interval: 5s
+      retries: 5
+
+  draft-service:
+    build:
+      context: ./DraftService   
+    environment:
+      DB_CONN: Host=draft-db;Username=hh;Password=hh;Database=drafts
+    ports:
+      - "5003:8080"
+    depends_on:
+      draft-db:
+        condition: service_healthy
+    networks: [hhnet]
+
+  
   # Article services (x3)
-  # ---------------------------
+  
   article-service-1:
     build:
       context: ./ArticleService
@@ -123,9 +150,9 @@ services:
       - an-db
     networks: [hhnet]
 
-  # ---------------------------
+  
   # Load balancer (nginx)
-  # ---------------------------
+  
   lb:
     image: nginx:alpine
     container_name: article-lb
@@ -139,9 +166,9 @@ services:
       - article-service-3
     networks: [hhnet]
 
-  # ---------------------------
+  
   # Postgres databases for articles
-  # ---------------------------
+  
   global-db:
     image: postgres:16-alpine
     environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
