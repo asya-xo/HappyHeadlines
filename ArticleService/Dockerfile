@@ -1,8 +1,8 @@
 # Base runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
+# Only expose the port we are going to use
 EXPOSE 8080
-EXPOSE 8081
 
 # Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -11,7 +11,6 @@ WORKDIR /src
 COPY ["ArticleService.csproj", "./"]
 RUN dotnet restore "./ArticleService.csproj"
 COPY . .
-WORKDIR /src
 RUN dotnet build "./ArticleService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Publish stage

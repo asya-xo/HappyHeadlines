@@ -1,3 +1,5 @@
+﻿version: "3.9"
+
 networks:
   hhnet:
 
@@ -12,9 +14,7 @@ x-article-env: &article_env
   DB_CONN_AN:     Host=an-db;Username=hh;Password=hh;Database=articles
 
 services:
-  
-  # Comment service + database
-  
+  # Comment service + DB
   comment-db:
     image: postgres:16-alpine
     environment:
@@ -42,9 +42,7 @@ services:
         condition: service_started
     networks: [hhnet]
 
-  
-  # Profanity service + database
-  
+  # Profanity service + DB
   profanity-db:
     image: postgres:16-alpine
     environment:
@@ -69,9 +67,7 @@ services:
         condition: service_healthy
     networks: [hhnet]
 
-  
-  # Draft service + database
-  
+  # Draft service + DB
   draft-db:
     image: postgres:16-alpine
     environment:
@@ -86,7 +82,7 @@ services:
 
   draft-service:
     build:
-      context: ./DraftService   
+      context: ./DraftService
     environment:
       DB_CONN: Host=draft-db;Username=hh;Password=hh;Database=drafts
     ports:
@@ -96,24 +92,13 @@ services:
         condition: service_healthy
     networks: [hhnet]
 
-  
-  # Article services (x3)
-  
+  # Article service instances (3x)
   article-service-1:
     build:
       context: ./ArticleService
     environment:
       <<: *article_env
       INSTANCE_NAME: "article-service-1"
-    depends_on:
-      - global-db
-      - eu-db
-      - na-db
-      - sa-db
-      - af-db
-      - as-db
-      - oc-db
-      - an-db
     networks: [hhnet]
 
   article-service-2:
@@ -122,15 +107,6 @@ services:
     environment:
       <<: *article_env
       INSTANCE_NAME: "article-service-2"
-    depends_on:
-      - global-db
-      - eu-db
-      - na-db
-      - sa-db
-      - af-db
-      - as-db
-      - oc-db
-      - an-db
     networks: [hhnet]
 
   article-service-3:
@@ -139,20 +115,9 @@ services:
     environment:
       <<: *article_env
       INSTANCE_NAME: "article-service-3"
-    depends_on:
-      - global-db
-      - eu-db
-      - na-db
-      - sa-db
-      - af-db
-      - as-db
-      - oc-db
-      - an-db
     networks: [hhnet]
 
-  
   # Load balancer (nginx)
-  
   lb:
     image: nginx:alpine
     container_name: article-lb
@@ -166,45 +131,12 @@ services:
       - article-service-3
     networks: [hhnet]
 
-  
-  # Postgres databases for articles
-  
-  global-db:
-    image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
-    networks: [hhnet]
-
-  eu-db:
-    image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
-    networks: [hhnet]
-
-  na-db:
-    image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
-    networks: [hhnet]
-
-  sa-db:
-    image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
-    networks: [hhnet]
-
-  af-db:
-    image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
-    networks: [hhnet]
-
-  as-db:
-    image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
-    networks: [hhnet]
-
-  oc-db:
-    image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
-    networks: [hhnet]
-
-  an-db:
-    image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
-    networks: [hhnet]
+  # Article DBs (per continent + global)
+  global-db: { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
+  eu-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
+  na-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
+  sa-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
+  af-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
+  as-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
+  oc-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
+  an-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }

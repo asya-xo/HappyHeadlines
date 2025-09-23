@@ -7,15 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// DbContext (use env var or fallback default)
-var connString = builder.Configuration["DB_CONN"]
-                 ?? "Host=localhost;Username=hh;Password=hh;Database=articles";
-
-builder.Services.AddDbContext<ArticleDbContext>(options =>
-    options.UseNpgsql(connString));
-
-// DI for repository
-builder.Services.AddScoped<ArticleRepository>();
+// Region resolver for multiple DBs
+builder.Services.AddSingleton<RegionConnectionResolver>();
 
 // Controllers
 builder.Services.AddControllers();
@@ -37,29 +30,5 @@ app.MapGet("/whoami", () =>
 
     return Results.Ok(new { service = "ArticleService", instance });
 });
-
-// --- Auto-migrate on startup with retry ---
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ArticleDbContext>();
-
-    var retries = 5;
-    while (retries > 0)
-    {
-        try
-        {
-            db.Database.Migrate();
-            Console.WriteLine("[ArticleService] DB migration applied successfully.");
-            break; // success
-        }
-        catch (Exception ex)
-        {
-            retries--;
-            Console.WriteLine($"[ArticleService] Could not connect to DB ({ex.Message}). Retries left: {retries}");
-            Thread.Sleep(2000);
-            if (retries == 0) throw;
-        }
-    }
-}
 
 app.Run();

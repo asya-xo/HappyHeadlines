@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ArticleService.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("articles")]
 public class ArticlesController : ControllerBase
 {
     private readonly ArticleRepository _repo;
