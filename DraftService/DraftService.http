@@ -1,0 +1,6 @@
+@DraftService_HostAddress = http://localhost:5139
+
+GET {{DraftService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
