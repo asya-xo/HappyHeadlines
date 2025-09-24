@@ -1,4 +1,4 @@
-﻿version: "3.9"
+﻿version: "3.9" 
 
 networks:
   hhnet:
@@ -26,6 +26,8 @@ services:
       test: ["CMD-SHELL", "pg_isready -U hh -d comments"]
       interval: 5s
       retries: 5
+    volumes:
+      - comment-data:/var/lib/postgresql/data
 
   comment-service:
     build:
@@ -54,6 +56,8 @@ services:
       test: ["CMD-SHELL", "pg_isready -U hh -d profanity"]
       interval: 5s
       retries: 5
+    volumes:
+      - profanity-data:/var/lib/postgresql/data
 
   profanity-service:
     build:
@@ -79,6 +83,8 @@ services:
       test: ["CMD-SHELL", "pg_isready -U hh -d drafts"]
       interval: 5s
       retries: 5
+    volumes:
+      - draft-data:/var/lib/postgresql/data
 
   draft-service:
     build:
@@ -132,11 +138,71 @@ services:
     networks: [hhnet]
 
   # Article DBs (per continent + global)
-  global-db: { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
-  eu-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
-  na-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
-  sa-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
-  af-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
-  as-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
-  oc-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
-  an-db:     { image: postgres:16-alpine, environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }, networks: [hhnet] }
+  global-db: 
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    networks: [hhnet]
+    volumes:
+      - article-global-data:/var/lib/postgresql/data
+
+  eu-db:     
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    networks: [hhnet]
+    volumes:
+      - article-eu-data:/var/lib/postgresql/data
+
+  na-db:     
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    networks: [hhnet]
+    volumes:
+      - article-na-data:/var/lib/postgresql/data
+
+  sa-db:     
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    networks: [hhnet]
+    volumes:
+      - article-sa-data:/var/lib/postgresql/data
+
+  af-db:     
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    networks: [hhnet]
+    volumes:
+      - article-af-data:/var/lib/postgresql/data
+
+  as-db:     
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    networks: [hhnet]
+    volumes:
+      - article-as-data:/var/lib/postgresql/data
+
+  oc-db:     
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    networks: [hhnet]
+    volumes:
+      - article-oc-data:/var/lib/postgresql/data
+
+  an-db:     
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    networks: [hhnet]
+    volumes:
+      - article-an-data:/var/lib/postgresql/data
+
+volumes:
+  draft-data:
+  comment-data:
+  profanity-data:
+  article-global-data:
+  article-eu-data:
+  article-na-data:
+  article-sa-data:
+  article-af-data:
+  article-as-data:
+  article-oc-data:
+  article-an-data:
