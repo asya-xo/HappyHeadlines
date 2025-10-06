@@ -16,6 +16,10 @@ builder.Services.AddScoped<ArticleRepository>();
 // Add controllers
 builder.Services.AddControllers();
 
+builder.Services.AddMemoryCache();
+builder.Services.AddHostedService<ArticleCacheLoader>();
+builder.Services.AddSingleton<ArticleCache>();
+
 var app = builder.Build();
 
 // Swagger UI

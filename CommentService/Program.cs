@@ -14,6 +14,8 @@ builder.Services.AddDbContext<CommentDbContext>(options =>
     options.UseNpgsql(connString));
 
 builder.Services.AddScoped<CommentRepository>();
+builder.Services.AddSingleton<CommentCache>();
+
 
 // ProfanityService URL 
 var profanityUrl = builder.Configuration["PROFANITY_URL"];
@@ -54,6 +56,8 @@ app.UseSwaggerUI();
 
 app.MapControllers();
 
+
+
 // Apply migrations on startup with retry
 using (var scope = app.Services.CreateScope())
 {
@@ -66,7 +70,7 @@ using (var scope = app.Services.CreateScope())
         {
             db.Database.Migrate();
             Console.WriteLine("CommentService DB migration applied successfully.");
-            break; // success
+            break; 
         }
         catch (Exception ex)
         {
@@ -77,7 +81,7 @@ using (var scope = app.Services.CreateScope())
                 Console.WriteLine("Failed to connect to DB after retries, exiting.");
                 throw;
             }
-            System.Threading.Thread.Sleep(5000); // wait 5 sec before retry
+            System.Threading.Thread.Sleep(5000); 
         }
     }
 }
