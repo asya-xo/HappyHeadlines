@@ -17,7 +17,7 @@ public class ArticleDbContext : DbContext
             .Options;
 
         var ctx = new ArticleDbContext(opts);
-        ctx.Database.EnsureCreated(); // fine for the assignment
+        ctx.Database.EnsureCreated(); 
         return ctx;
     }
 }
