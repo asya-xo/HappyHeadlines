@@ -12,7 +12,7 @@ namespace CommentService.Data
 
         private const int MaxArticles = 30;
 
-        // 🟢 Add these counters
+       
         private int _hits = 0;
         private int _misses = 0;
 
