@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Add logging and tracing //N
+
 // Connection string
 var connString = builder.Configuration["DB_CONN"]
                  ?? builder.Configuration.GetConnectionString("DB_CONN")
