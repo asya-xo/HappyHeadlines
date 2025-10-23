@@ -1,58 +1,79 @@
 using DraftService.Data;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
 
-//Add logging and tracing
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithProcessId()
+    .Enrich.WithThreadId()
+    .WriteTo.Console()
+    .WriteTo.Seq("http://seq:5341") 
+    .CreateLogger();
 
-// Connection string
-var connString = builder.Configuration["DB_CONN"]
-                 ?? builder.Configuration.GetConnectionString("DB_CONN")
-                 ?? "Host=localhost;Username=hh;Password=hh;Database=drafts";
-
-builder.Services.AddDbContext<DraftDbContext>(options =>
-    options.UseNpgsql(connString));
-
-builder.Services.AddScoped<DraftRepository>();
-
-// Controllers + Swagger
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-app.UseSwagger();
-app.UseSwaggerUI();
-
-app.MapControllers();
-
-// Apply migrations on startup with retry
-using (var scope = app.Services.CreateScope())
+try
 {
-    var db = scope.ServiceProvider.GetRequiredService<DraftDbContext>();
+    Log.Information("Starting DraftService...");
 
-    var retries = 5;
-    while (retries > 0)
+    var builder = WebApplication.CreateBuilder(args);
+    builder.Host.UseSerilog();
+
+    var connString = builder.Configuration["DB_CONN"]
+                     ?? builder.Configuration.GetConnectionString("DB_CONN")
+                     ?? "Host=localhost;Username=hh;Password=hh;Database=drafts";
+
+    builder.Services.AddDbContext<DraftDbContext>(options =>
+        options.UseNpgsql(connString));
+
+    builder.Services.AddScoped<DraftRepository>();
+
+    builder.Services.AddControllers();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+    var app = builder.Build();
+
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.MapControllers();
+
+    // Applyinf migrations on startup with retry + Serilog
+    using (var scope = app.Services.CreateScope())
     {
-        try
+        var db = scope.ServiceProvider.GetRequiredService<DraftDbContext>();
+        var retries = 5;
+
+        while (retries > 0)
         {
-            db.Database.Migrate();
-            Console.WriteLine("DraftService DB migration applied successfully.");
-            break; // success
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"DB not ready yet: {ex.Message}");
-            retries--;
-            if (retries == 0)
+            try
             {
-                Console.WriteLine("Failed to connect to DB after retries, exiting.");
-                throw;
+                db.Database.Migrate();
+                Log.Information("Database migration successful!");
+                break;
             }
-            System.Threading.Thread.Sleep(5000); 
+            catch (Exception ex)
+            {
+                retries--;
+                Log.Warning(ex, "Database not ready, retries left: {Retries}", retries);
+                if (retries == 0)
+                {
+                    Log.Fatal(ex, "Could not connect to DraftDatabase after retries");
+                    throw;
+                }
+                Thread.Sleep(5000);
+            }
         }
     }
-}
 
-app.Run();
+    Log.Information("DraftService is running");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "DraftService crashed unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

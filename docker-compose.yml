@@ -194,6 +194,18 @@ services:
     volumes:
       - article-an-data:/var/lib/postgresql/data
 
+
+  seq:
+    image: datalust/seq
+    ports:
+      - "5341:5341"
+      - "8081:80"
+    environment:
+      - ACCEPT_EULA=Y
+    volumes:
+      - seq_data:/data
+    networks:
+      - hhnet
 volumes:
   draft-data:
   comment-data:
@@ -206,3 +218,6 @@ volumes:
   article-as-data:
   article-oc-data:
   article-an-data:
+
+
+
