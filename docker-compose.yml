@@ -218,6 +218,7 @@ volumes:
   article-as-data:
   article-oc-data:
   article-an-data:
+  seq_data:
 
 
 
