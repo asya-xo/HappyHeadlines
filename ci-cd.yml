@@ -43,4 +43,3 @@ jobs:
           context: ./ArticleService
           push: true
           tags: ghcr.io/${{ github.repository }}/articleservice:latest
-          

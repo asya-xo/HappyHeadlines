@@ -21,14 +21,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{05F07ED0-9D2E-498F-AED8-50232AAAEAB0}"
-	ProjectSection(SolutionItems) = preProject
-		ci-cd.yml = ci-cd.yml
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{FF8D8024-CF84-420A-834C-85899EF3C57A}"
-	ProjectSection(SolutionItems) = preProject
-		ci-cd.yml = ci-cd.yml
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
