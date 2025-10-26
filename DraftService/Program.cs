@@ -1,11 +1,14 @@
 using DraftService.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Serilog.Extensions.Hosting;
+
+
 
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
-    .Enrich.WithEnvironmentName()
+    .Enrich.WithMachineName()
     .Enrich.WithProcessId()
     .Enrich.WithThreadId()
     .WriteTo.Console()
