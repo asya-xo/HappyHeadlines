@@ -1,55 +1,71 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using SubscriberService.Data;
 using SubscriberService.Models;
-
-// https://localhost:7084/swagger/index.html
+using System.Net.Http.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddOpenApi();
-builder.Services.AddDbContext<SubscriberDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+// --- DATABASE ---
+builder.Services.AddDbContext<SubscriberDbContext>(opt =>
+    opt.UseSqlite("Data Source=subscribers.db"));
+
+// --- SWAGGER ---
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "SubscriberService API",
+        Version = "v1",
+        Description = "Handles subscriber registration and posting to the queue."
+    });
+});
 
 var app = builder.Build();
 
-var isEnabled = builder.Configuration.GetValue<bool>("SubscriberServiceEnabled", true);
-
-// Configure the HTTP request pipeline.
+// --- SWAGGER UI CONFIGURATION ---
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.UseSwaggerUI(options =>
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
     {
-        options.SwaggerEndpoint("/openapi/v1.json", "SubscriberService v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "SubscriberService v1");
+        c.RoutePrefix = "swagger";
     });
 }
+
+// --- FEATURE TOGGLE ---
+var isEnabled = builder.Configuration.GetValue<bool>("SubscriberServiceEnabled");
+
+// --- READ QUEUE BASE URL FROM CONFIG ---
+var queueBaseUrl = builder.Configuration.GetValue<string>("Queue:BaseUrl") ?? "http://localhost:5190";
 
 if (isEnabled)
 {
-    // Database-backed endpoints
-    app.MapPost("/api/subscribers", async (Subscriber newSub, SubscriberDbContext db) =>
+    app.MapPost("/api/subscribers", async (Subscriber subscriber, SubscriberDbContext db) =>
     {
-        newSub.CreatedAt = DateTime.UtcNow;
-        db.Subscribers.Add(newSub);
+        db.Subscribers.Add(subscriber);
         await db.SaveChangesAsync();
-        return Results.Created($"/api/subscribers/{newSub.Id}", newSub);
+
+        using var http = new HttpClient();
+        await http.PostAsJsonAsync($"{queueBaseUrl}/api/queue", new { email = subscriber.Email });
+
+        return Results.Created($"/api/subscribers/{subscriber.Id}", subscriber);
     });
 
     app.MapGet("/api/subscribers", async (SubscriberDbContext db) =>
+        await db.Subscribers.ToListAsync());
+
+    app.MapDelete("/api/subscribers/{id}", async (int id, SubscriberDbContext db) =>
     {
-        var allSubs = await db.Subscribers.ToListAsync();
-        return Results.Ok(allSubs);
+        var subscriber = await db.Subscribers.FindAsync(id);
+        if (subscriber is null) return Results.NotFound();
+
+        db.Subscribers.Remove(subscriber);
+        await db.SaveChangesAsync();
+        return Results.Ok();
     });
-}
-else
-{
-    // Service disabled (release toggle)
-    app.MapGet("/{*path}", () => Results.StatusCode(503));
-    app.MapPost("/{*path}", () => Results.StatusCode(503));
 }
 
 app.Run();

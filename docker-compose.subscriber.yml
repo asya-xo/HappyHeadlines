@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  subscriber-queue:
+    build:
+      context: ./SubscriberQueue
+      dockerfile: Dockerfile
+    container_name: subscriber-queue
+    ports:
+      - "5190:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  subscriber-service:
+    build:
+      context: ./SubscriberService
+      dockerfile: Dockerfile
+    container_name: subscriber-service
+    ports:
+      - "5191:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Queue__BaseUrl=http://subscriber-queue:8080   # this connects to queue internally
+    depends_on:
+      - subscriber-queue

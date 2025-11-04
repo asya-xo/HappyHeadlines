@@ -19,12 +19,17 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DraftService", "DraftService\DraftService.csproj", "{7A2B8C9A-3A85-12FC-7988-4FCB7522E1B9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.subscriber.yml = docker-compose.subscriber.yml
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{05F07ED0-9D2E-498F-AED8-50232AAAEAB0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{FF8D8024-CF84-420A-834C-85899EF3C57A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubscriberService", "SubscriberService\SubscriberService.csproj", "{2B576679-D79B-E9D6-84E4-08D7DF999E06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubscriberQueue", "SubscriberQueue\SubscriberQueue.csproj", "{2999D862-4133-A214-40DB-FB3862B94F42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +61,10 @@ Global
 		{2B576679-D79B-E9D6-84E4-08D7DF999E06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B576679-D79B-E9D6-84E4-08D7DF999E06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B576679-D79B-E9D6-84E4-08D7DF999E06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2999D862-4133-A214-40DB-FB3862B94F42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2999D862-4133-A214-40DB-FB3862B94F42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2999D862-4133-A214-40DB-FB3862B94F42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2999D862-4133-A214-40DB-FB3862B94F42}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
