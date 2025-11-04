@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using SubscriberService.Models;
+
+//https://localhost:7084/swagger/index.html
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,30 +23,21 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+var subscribers = new List<Subscriber>();
 
-var summaries = new[]
+app.MapPost("/api/subscribers", (Subscriber newSub) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    newSub.Id = subscribers.Count + 1;
+    newSub.CreatedAt = DateTime.UtcNow;
+    subscribers.Add(newSub);
+    return Results.Created($"/api/subscribers/{newSub.Id}", newSub);
+});
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/api/subscribers", () =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    return Results.Ok(subscribers);
+});
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+
