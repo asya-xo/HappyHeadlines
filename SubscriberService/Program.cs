@@ -13,6 +13,9 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+var isEnabled = builder.Configuration.GetValue<bool>("SubscriberServiceEnabled", true);
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -23,21 +26,28 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-var subscribers = new List<Subscriber>();
-
-app.MapPost("/api/subscribers", (Subscriber newSub) =>
+if (isEnabled)
 {
-    newSub.Id = subscribers.Count + 1;
-    newSub.CreatedAt = DateTime.UtcNow;
-    subscribers.Add(newSub);
-    return Results.Created($"/api/subscribers/{newSub.Id}", newSub);
-});
+    var subscribers = new List<Subscriber>();
 
-app.MapGet("/api/subscribers", () =>
+    app.MapPost("/api/subscribers", (Subscriber newSub) =>
+    {
+        newSub.Id = subscribers.Count + 1;
+        newSub.CreatedAt = DateTime.UtcNow;
+        subscribers.Add(newSub);
+        return Results.Created($"/api/subscribers/{newSub.Id}", newSub);
+    });
+
+    app.MapGet("/api/subscribers", () =>
+    {
+        return Results.Ok(subscribers);
+    });
+}
+else
 {
-    return Results.Ok(subscribers);
-});
+    app.MapGet("/{*path}", () => Results.StatusCode(503));
+    app.MapPost("/{*path}", () => Results.StatusCode(503));
+}
+
 
 app.Run();
-
-
