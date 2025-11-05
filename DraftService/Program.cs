@@ -2,6 +2,7 @@ using DraftService.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Extensions.Hosting;
+using System.Diagnostics;
 
 
 // tessttt github actions
@@ -18,6 +19,10 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     Log.Information("Starting DraftService...");
+
+
+    Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+    Activity.ForceDefaultIdFormat = true;
 
     var builder = WebApplication.CreateBuilder(args);
     builder.Host.UseSerilog();
