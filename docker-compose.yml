@@ -217,19 +217,19 @@ services:
     networks: [hhnet]
     volumes:
       - article-an-data:/var/lib/postgresql/data
-
-  # Seq logging service
   seq:
     image: datalust/seq
     ports:
-      - "5343:5341"  
-      - "8095:80"    
+      - "5343:5341"
+      - "8099:80"
     environment:
       - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_NOAUTHENTICATION=true
     volumes:
       - seq_data:/data
     networks:
       - hhnet
+
 
 volumes:
   draft-data:
