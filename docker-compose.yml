@@ -1,4 +1,4 @@
-﻿version: "3.9" 
+﻿version: "3.9"
 
 networks:
   hhnet:
@@ -138,74 +138,99 @@ services:
     networks: [hhnet]
 
   # Article DBs (per continent + global)
-  global-db: 
+  global-db:
     image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    environment:
+      POSTGRES_USER: "hh"
+      POSTGRES_PASSWORD: "hh"
+      POSTGRES_DB: "articles"
     networks: [hhnet]
     volumes:
       - article-global-data:/var/lib/postgresql/data
 
-  eu-db:     
+  eu-db:
     image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    environment:
+      POSTGRES_USER: "hh"
+      POSTGRES_PASSWORD: "hh"
+      POSTGRES_DB: "articles"
     networks: [hhnet]
     volumes:
       - article-eu-data:/var/lib/postgresql/data
 
-  na-db:     
+  na-db:
     image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    environment:
+      POSTGRES_USER: "hh"
+      POSTGRES_PASSWORD: "hh"
+      POSTGRES_DB: "articles"
     networks: [hhnet]
     volumes:
       - article-na-data:/var/lib/postgresql/data
 
-  sa-db:     
+  sa-db:
     image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    environment:
+      POSTGRES_USER: "hh"
+      POSTGRES_PASSWORD: "hh"
+      POSTGRES_DB: "articles"
     networks: [hhnet]
     volumes:
       - article-sa-data:/var/lib/postgresql/data
 
-  af-db:     
+  af-db:
     image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    environment:
+      POSTGRES_USER: "hh"
+      POSTGRES_PASSWORD: "hh"
+      POSTGRES_DB: "articles"
     networks: [hhnet]
     volumes:
       - article-af-data:/var/lib/postgresql/data
 
-  as-db:     
+  as-db:
     image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    environment:
+      POSTGRES_USER: "hh"
+      POSTGRES_PASSWORD: "hh"
+      POSTGRES_DB: "articles"
     networks: [hhnet]
     volumes:
       - article-as-data:/var/lib/postgresql/data
 
-  oc-db:     
+  oc-db:
     image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    environment:
+      POSTGRES_USER: "hh"
+      POSTGRES_PASSWORD: "hh"
+      POSTGRES_DB: "articles"
     networks: [hhnet]
     volumes:
       - article-oc-data:/var/lib/postgresql/data
 
-  an-db:     
+  an-db:
     image: postgres:16-alpine
-    environment: { POSTGRES_USER: "hh", POSTGRES_PASSWORD: "hh", POSTGRES_DB: "articles" }
+    environment:
+      POSTGRES_USER: "hh"
+      POSTGRES_PASSWORD: "hh"
+      POSTGRES_DB: "articles"
     networks: [hhnet]
     volumes:
       - article-an-data:/var/lib/postgresql/data
 
-
+  # Seq logging service
   seq:
     image: datalust/seq
     ports:
-      - "5341:5341"
-      - "8081:80"
+      - "5343:5341"  
+      - "8095:80"    
     environment:
       - ACCEPT_EULA=Y
     volumes:
       - seq_data:/data
     networks:
       - hhnet
+
 volumes:
   draft-data:
   comment-data:
@@ -219,6 +244,3 @@ volumes:
   article-oc-data:
   article-an-data:
   seq_data:
-
-
-
