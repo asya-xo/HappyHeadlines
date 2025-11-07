@@ -2,88 +2,50 @@
 using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Extensions.Http;
+using System.Diagnostics;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
+using Serilog;
+
+Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+Activity.ForceDefaultIdFormat = true;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.Seq("http://seq:5341")
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
-// Connection string
+builder.Services.AddOpenTelemetry()
+    .WithTracing(t =>
+    {
+        t.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("CommentService"))
+         .AddAspNetCoreInstrumentation()
+         .AddHttpClientInstrumentation()
+         .AddEntityFrameworkCoreInstrumentation()
+         .AddOtlpExporter();
+    });
+
 var connString = builder.Configuration["DB_CONN"]
-                 ?? builder.Configuration.GetConnectionString("DB_CONN")
                  ?? "Host=localhost;Username=hh;Password=hh;Database=comments";
 
-builder.Services.AddDbContext<CommentDbContext>(options =>
-    options.UseNpgsql(connString));
-
+builder.Services.AddDbContext<CommentDbContext>(o => o.UseNpgsql(connString));
 builder.Services.AddScoped<CommentRepository>();
 builder.Services.AddSingleton<CommentCache>();
 
-
-// ProfanityService URL 
 var profanityUrl = builder.Configuration["PROFANITY_URL"];
+builder.Services.AddHttpClient("ProfanityService", c => c.BaseAddress = new Uri(profanityUrl))
+    .AddPolicyHandler(HttpPolicyExtensions.HandleTransientHttpError()
+        .CircuitBreakerAsync(1, TimeSpan.FromSeconds(30)));
 
-// Add HttpClient with Circuit Breaker
-builder.Services.AddHttpClient("ProfanityService", client =>
-{
-    client.BaseAddress = new Uri(profanityUrl);
-})
-.AddPolicyHandler(HttpPolicyExtensions
-    .HandleTransientHttpError()
-    .CircuitBreakerAsync(
-        handledEventsAllowedBeforeBreaking: 1,
-        durationOfBreak: TimeSpan.FromSeconds(30),
-        onBreak: (outcome, breakDelay) =>
-        {
-            Console.WriteLine($"[CircuitBreaker] OPEN - ProfanityService down, retry after {breakDelay.TotalSeconds}s");
-        },
-        onReset: () =>
-        {
-            Console.WriteLine("[CircuitBreaker] CLOSED - ProfanityService healthy again");
-        },
-        onHalfOpen: () =>
-        {
-            Console.WriteLine("[CircuitBreaker] HALF-OPEN - Testing ProfanityService");
-        }
-    ));
-
-// Controllers + Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
 app.UseSwagger();
 app.UseSwaggerUI();
-
 app.MapControllers();
-
-
-
-// Apply migrations on startup with retry
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<CommentDbContext>();
-
-    var retries = 5;
-    while (retries > 0)
-    {
-        try
-        {
-            db.Database.Migrate();
-            Console.WriteLine("CommentService DB migration applied successfully.");
-            break; 
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"DB not ready yet: {ex.Message}");
-            retries--;
-            if (retries == 0)
-            {
-                Console.WriteLine("Failed to connect to DB after retries, exiting.");
-                throw;
-            }
-            System.Threading.Thread.Sleep(5000); 
-        }
-    }
-}
-
 app.Run();
