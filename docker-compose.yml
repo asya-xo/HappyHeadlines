@@ -98,6 +98,29 @@ services:
         condition: service_healthy
     networks: [hhnet]
 
+  # Publisher service
+  publisherservice:
+    build:
+      context: .
+      dockerfile: PublisherService/Dockerfile
+    ports:
+      - "5342:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - subscriberqueue
+    networks:
+      - hhnet
+
+  # SubscriberQueue service (added)
+  subscriberqueue:
+    build:
+      context: ./SubscriberQueue
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - hhnet
+
   # Article service instances (3x)
   article-service-1:
     build:
@@ -144,6 +167,8 @@ services:
       POSTGRES_USER: "hh"
       POSTGRES_PASSWORD: "hh"
       POSTGRES_DB: "articles"
+      POSTGRES_LOGGING_COLLECTOR: "off"
+      POSTGRES_LOG_STATEMENT: "none"
     networks: [hhnet]
     volumes:
       - article-global-data:/var/lib/postgresql/data
@@ -154,6 +179,8 @@ services:
       POSTGRES_USER: "hh"
       POSTGRES_PASSWORD: "hh"
       POSTGRES_DB: "articles"
+      POSTGRES_LOGGING_COLLECTOR: "off"
+      POSTGRES_LOG_STATEMENT: "none"
     networks: [hhnet]
     volumes:
       - article-eu-data:/var/lib/postgresql/data
@@ -164,6 +191,8 @@ services:
       POSTGRES_USER: "hh"
       POSTGRES_PASSWORD: "hh"
       POSTGRES_DB: "articles"
+      POSTGRES_LOGGING_COLLECTOR: "off"
+      POSTGRES_LOG_STATEMENT: "none"
     networks: [hhnet]
     volumes:
       - article-na-data:/var/lib/postgresql/data
@@ -174,6 +203,8 @@ services:
       POSTGRES_USER: "hh"
       POSTGRES_PASSWORD: "hh"
       POSTGRES_DB: "articles"
+      POSTGRES_LOGGING_COLLECTOR: "off"
+      POSTGRES_LOG_STATEMENT: "none"
     networks: [hhnet]
     volumes:
       - article-sa-data:/var/lib/postgresql/data
@@ -184,6 +215,8 @@ services:
       POSTGRES_USER: "hh"
       POSTGRES_PASSWORD: "hh"
       POSTGRES_DB: "articles"
+      POSTGRES_LOGGING_COLLECTOR: "off"
+      POSTGRES_LOG_STATEMENT: "none"
     networks: [hhnet]
     volumes:
       - article-af-data:/var/lib/postgresql/data
@@ -194,6 +227,8 @@ services:
       POSTGRES_USER: "hh"
       POSTGRES_PASSWORD: "hh"
       POSTGRES_DB: "articles"
+      POSTGRES_LOGGING_COLLECTOR: "off"
+      POSTGRES_LOG_STATEMENT: "none"
     networks: [hhnet]
     volumes:
       - article-as-data:/var/lib/postgresql/data
@@ -204,6 +239,8 @@ services:
       POSTGRES_USER: "hh"
       POSTGRES_PASSWORD: "hh"
       POSTGRES_DB: "articles"
+      POSTGRES_LOGGING_COLLECTOR: "off"
+      POSTGRES_LOG_STATEMENT: "none"
     networks: [hhnet]
     volumes:
       - article-oc-data:/var/lib/postgresql/data
@@ -214,9 +251,13 @@ services:
       POSTGRES_USER: "hh"
       POSTGRES_PASSWORD: "hh"
       POSTGRES_DB: "articles"
+      POSTGRES_LOGGING_COLLECTOR: "off"
+      POSTGRES_LOG_STATEMENT: "none"
     networks: [hhnet]
     volumes:
       - article-an-data:/var/lib/postgresql/data
+
+  # Seq service for centralized logs
   seq:
     image: datalust/seq
     ports:
@@ -229,7 +270,6 @@ services:
       - seq_data:/data
     networks:
       - hhnet
-
 
 volumes:
   draft-data:
